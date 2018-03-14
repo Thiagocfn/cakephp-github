@@ -6,8 +6,12 @@ use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Datasource\ModelAwareTrait;
 use Cake\TestSuite\TestCase;
+use Muffin\Webservice\Model\Endpoint;
 
-class GeneralTest extends TestCase
+/**
+ * @property  Endpoint Users
+ */
+class UsersTest extends TestCase
 {
 
     use ModelAwareTrait;
@@ -15,7 +19,6 @@ class GeneralTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
         $configs = ConnectionManager::configured();
         if (!in_array('git_hub',$configs,true)) {
             ConnectionManager::config('git_hub', [
@@ -23,20 +26,28 @@ class GeneralTest extends TestCase
                 'service' => 'CvoTechnologies/GitHub.GitHub',
             ]);
         }
-    }
-
-    public function testEndpoint()
-    {
         $this->modelFactory('Endpoint', ['Muffin\Webservice\Model\EndpointRegistry', 'get']);
 
-        $this->loadModel('CvoTechnologies/GitHub.Issues', 'Endpoint');
-
-        $issues = $this->Issues->find()->where([
-            'owner' => 'cakephp',
-            'repo' => 'cakephp'
-        ]);
-
-        $this->assertEquals('issues', $this->Issues->webservice()->endpoint());
-        $this->assertInstanceOf('\Muffin\Webservice\Query', $issues);
+        $this->loadModel('CvoTechnologies/GitHub.Users', 'Endpoint');
     }
+
+
+    public function testUsers()
+    {
+        $issues = $this->Users->find()->where([
+            'user' => 'thiagocfn'
+        ]);
+        $users = $issues->all();
+        static::assertEquals("Thiagocfn", $users->first()->login);
+    }
+
+    public function testUsersNotFound()
+    {
+        $issues = $this->Users->find()->where([
+            'user' => 'thiaagocfn'
+        ]);
+        $users = $issues->all();
+        static::assertFalse($users);
+    }
+
 }
